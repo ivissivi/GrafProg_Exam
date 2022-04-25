@@ -20,7 +20,7 @@
 
     const hdr = '/geislingen_an_der_steige_1k.hdr';
 
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var geometry = new THREE.BoxGeometry( 1, 1, 3 );
     var material = new THREE.MeshStandardMaterial( { 
         
         color: 0xff0000,
@@ -36,7 +36,7 @@
 
     directionalLight.target = cannonPlayer1
 
-    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var geometry = new THREE.BoxGeometry( 1, 1, 3 );
     var material = new THREE.MeshStandardMaterial( { 
         
         color: 0x00ff00,
@@ -72,7 +72,7 @@
     function onDocumentKeyDown(event) {
         var keyCode = event.which;
         console.log(event);
-        if (keyCode == 65) { //Vada player1 izmantojot WASD
+        if (keyCode == 65) { //Vada player1 izmantojot WASD taustiņus
             cannonPlayer1.position.x += ySpeed;
         } else if (keyCode == 68) {
             cannonPlayer1.position.x -= ySpeed;
@@ -84,13 +84,13 @@
             cannonPlayer1.position.set(0, 0, -5); //Default pozīcijas, izmantojot spacebar
         }
 
-        if (keyCode == 40) { //Vada cannonPlayer2 izmantojot arrow keys
+        if (keyCode == 75) { //Vada cannonPlayer2 izmantojot IJKL taustiņus
             cannoncannonPlayer2.position.z += ySpeed;
-        } else if (keyCode == 38) {
+        } else if (keyCode == 73) {
             cannoncannonPlayer2.position.z -= ySpeed;
-        } else if (keyCode == 37) {
+        } else if (keyCode == 74) {
             cannoncannonPlayer2.position.x -= xSpeed;
-        } else if (keyCode == 39) {
+        } else if (keyCode == 76) {
             cannoncannonPlayer2.position.x += xSpeed;
         } else if (keyCode == 32) {
             cannoncannonPlayer2.position.set(0, 0, 5); // Default pozīcijas, izmantojot spacebar
@@ -109,26 +109,36 @@
         }
     };
 
-    var bulletRadius = 0.3,
-        bullet, 
-        cannonPlayer1, 
-        cannonPlayer2, 
-        field,
-        score = {
-        attackGood: 0,
-        attackBad: 0
-      };
+    var bullets = [];
+    window.addEventListener("mousedown", onMouseDown);
 
-      var bulletGeometry = new THREE.SphereGeometry(bulletRadius, 16, 16),
+    function onMouseDown() { var bulletGeometry = new THREE.SphereGeometry(bulletRadius, 16, 16),
         bulletMaterial = new THREE.MeshPhongMaterial({ 
           map: new THREE.TextureLoader().load(bulletTexture),
           side: THREE.DoubleSide,
           shininess: 0,
           });
           bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-          scene.add(bullet);
+        bullet.position.copy(cannonPlayer2.getWorldPosition());
+        bullet.quaternion.copy(camera.quaternion);
+        scene.add(bullet);
+        bullets.push(bullet);
+      }
+      
+      var speed = 1;
+      var clock = new THREE.Clock();
+      var delta = 0;
 
-      function shootBullet() {
+    var bulletRadius = 0.3,
+        bullet, 
+        cannonPlayer1, 
+        cannonPlayer2, 
+        score = {
+        attackGood: 0,
+        attackBad: 0
+      };
+
+      /*function shootBullet() {
         var direction = 1;
         bullet.$velocity = {
           x: Math.random() * (50 - 20) + (-20),
@@ -153,11 +163,11 @@
           }
 
           if(didMissPlayer()) {
-            handleEvent('saveBad');
+            handleEvent('shotBad');
           }
           
             if(didAttackPlayer()) {
-            handleEvent('saveGood');
+            handleEvent('shotGood');
             }
         }
         
@@ -190,7 +200,7 @@
               BulletX < playerX + playerWidthDivided;
         }
 
-        function handleEvent(goal) {
+        function handleEvent(shot) {
             stopBullet();
             setTimeout(reset, 2000);
         }
@@ -202,12 +212,15 @@
         function reset() {
           bullet.position.set(0,0,0);
           bullet.$velocity = null;
-        }
-
+        }*/
 
         var animate = function () {
         requestAnimationFrame( animate );
-        bulletMovement();
+        //bulletMovement();
+        delta = clock.getDelta();
+        bullets.forEach(b => {
+          b.translateZ(-speed * delta);
+        });
         controls.update();
 
         renderer.render( scene, camera );
